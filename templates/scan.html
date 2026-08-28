@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan Mineral – SPECTRA</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="navbar">
+        <a class="logo" href="/">⛏️ SPECTRA</a>
+        <div class="nav-links">
+            <a href="/">Dashboard</a>
+            <a href="/profile">Profile</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔍 Scan Mineral</h2>
+        <form action="/api/predict" method="post" enctype="multipart/form-data">
+            <div class="upload-area">
+                <p>Upload a clear photo of the mineral</p>
+                <input type="file" name="file" accept="image/*" required>
+            </div>
+            <button type="submit" class="btn" style="width:100%;">Identify Mineral</button>
+        </form>
+    </div>
+</body>
+</html>
