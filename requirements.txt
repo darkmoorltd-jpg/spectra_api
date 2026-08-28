@@ -3,9 +3,9 @@ uvicorn[standard]
 supabase
 jinja2
 python-multipart
-torch
-torchvision
-timm
 pillow
-numpy
 requests
+numpy
+timm
+torch --index-url https://download.pytorch.org/whl/cpu
+torchvision --index-url https://download.pytorch.org/whl/cpu
