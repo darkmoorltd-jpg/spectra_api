@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SPECTRA</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>⛏️ SPECTRA</h1>
+        {% if user %}
+            <p>Logged in as {{ user.email }}</p>
+            <form action="/api/logout" method="post">
+                <button type="submit">Logout</button>
+            </form>
+            <!-- Upload form -->
+            <form action="/api/predict" method="post" enctype="multipart/form-data">
+                <input type="file" name="file" accept="image/*">
+                <button type="submit">Identify Mineral</button>
+            </form>
+        {% else %}
+            <a href="/login">Login</a> | <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</body>
+</html>
