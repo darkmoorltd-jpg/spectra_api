@@ -2,25 +2,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SPECTRA</title>
+    <title>SPECTRA – Mineral AI</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
+    <div class="navbar">
+        <a class="logo" href="/">⛏️ SPECTRA</a>
+        <div class="nav-links">
+            {% if user %}
+                <a href="/">Dashboard</a>
+                <a href="/scan">Scan Mineral</a>
+                <a href="/profile">Profile</a>
+                <form action="/api/logout" method="post" style="display:inline;">
+                    <button type="submit" class="btn" style="background:transparent;color:var(--gold);padding:0.5rem 1rem;">Logout</button>
+                </form>
+            {% else %}
+                <a href="/login">Login</a>
+                <a href="/signup" class="btn">Sign Up Free</a>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="container">
-        <h1>⛏️ SPECTRA</h1>
-        {% if user %}
-            <p>Logged in as {{ user.email }}</p>
-            <form action="/api/logout" method="post">
-                <button type="submit">Logout</button>
-            </form>
-            <!-- Upload form -->
-            <form action="/api/predict" method="post" enctype="multipart/form-data">
-                <input type="file" name="file" accept="image/*">
-                <button type="submit">Identify Mineral</button>
-            </form>
-        {% else %}
-            <a href="/login">Login</a> | <a href="/signup">Sign Up</a>
-        {% endif %}
+        <div class="hero">
+            <h1>SPECTRA</h1>
+            <p>Know your mineral. Get fair cash.</p>
+            {% if user %}
+                <p>Welcome back, {{ user.email }}</p>
+                <a href="/scan" class="btn">🔍 Scan Mineral</a>
+            {% else %}
+                <a href="/signup" class="btn">Get Started</a>
+            {% endif %}
+        </div>
+
+        <div class="grid-3">
+            <div class="card">
+                <h3>🔍 Instant ID</h3>
+                <p>AI identifies 7+ minerals from a photo.</p>
+            </div>
+            <div class="card">
+                <h3>💎 Grade Estimate</h3>
+                <p>Get ore grade and market value.</p>
+            </div>
+            <div class="card">
+                <h3>📊 Vault</h3>
+                <p>Save scans and track earnings.</p>
+            </div>
+        </div>
     </div>
 </body>
 </html>
