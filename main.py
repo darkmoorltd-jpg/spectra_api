@@ -48,15 +48,15 @@ def get_user_from_cookie(request: Request):
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     user = get_user_from_cookie(request)
-    return templates.TemplateResponse("index.html", {"request": request, "user": user})
+    return templates.TemplateResponse(request, "index.html", {"user": user})
 
 @app.get("/signup", response_class=HTMLResponse)
 async def signup_page(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
+    return templates.TemplateResponse(request, "signup.html", {})
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html", {})
 
 @app.post("/api/signup")
 async def api_signup(email: str = Form(...), password: str = Form(...), first_name: str = Form(""), last_name: str = Form("")):
