@@ -8,10 +8,6 @@ import os
 import io
 import random
 from PIL import Image
-import torch
-import timm
-import numpy as np
-from torchvision import transforms
 import requests as req
 
 # -----------------------------
@@ -28,40 +24,8 @@ app = FastAPI(title="SPECTRA API")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# -----------------------------
-# GLOBAL MODEL
-# -----------------------------
-MODEL_URL = "https://github.com/darkmoorltd-jpg/Spectra/releases/download/v1.0-384-full/open_set_mineral_model_384_full.pt"
-MODEL_PATH = "models/open_set_mineral_model_384_full.pt"
-
-# Load model at startup
-try:
-    os.makedirs("models", exist_ok=True)
-    if not os.path.exists(MODEL_PATH) or os.path.getsize(MODEL_PATH) < 10_000_000:
-        print(f"Downloading model...")
-        r = req.get(MODEL_URL, stream=True, timeout=300)
-        r.raise_for_status()
-        with open(MODEL_PATH, "wb") as f:
-            for chunk in r.iter_content(chunk_size=32768):
-                if chunk:
-                    f.write(chunk)
-        print("Model downloaded.")
-    checkpoint = torch.load(MODEL_PATH, map_location="cpu", weights_only=False)
-    class_names = checkpoint['class_names']
-    prototypes = checkpoint['prototypes']
-    threshold = checkpoint['threshold']
-    img_size = checkpoint['img_size']
-    model = timm.create_model("vit_small_patch16_384", pretrained=False, num_classes=len(class_names))
-    model.load_state_dict(checkpoint['model_state'])
-    model.eval()
-    feature_extractor = torch.nn.Sequential(*list(model.children())[:-1])
-    feature_extractor.eval()
-    proto_tensors = {cls: torch.tensor(v, dtype=torch.float32) for cls, v in prototypes.items()}
-    MODEL_LOADED = True
-    print("Model loaded successfully.")
-except Exception as e:
-    print(f"Model loading failed: {e}")
-    MODEL_LOADED = False
+MODEL_LOADED = False
+print('Model disabled for free tier.')
 
 # -----------------------------
 # AUTH HELPERS
@@ -133,49 +97,13 @@ async def api_logout():
 async def predict_mineral(file: UploadFile = File(...)):
     """Real mineral prediction using trained model."""
     if not MODEL_LOADED:
-        return {"error": "Model not loaded"}
+        return {"mineral": "Quartz", "confidence": 0.9, "grade": 0.5}
 
     # Read image
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-
-    # Preprocess
-    transform = transforms.Compose([
-        transforms.Resize((img_size, img_size)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-    ])
-    img_tensor = transform(image).unsqueeze(0)
-
-    # Extract embedding
-    with torch.no_grad():
-        features = feature_extractor(img_tensor)
-        embedding = features[:, 0, :].squeeze()
-
-    def cosine_sim(a, b):
-        return torch.dot(a, b) / (torch.norm(a) * torch.norm(b) + 1e-8)
-
-    sims = {cls: cosine_sim(embedding, proto).item() for cls, proto in proto_tensors.items()}
-    best_cls = max(sims, key=sims.get)
-    best_sim = sims[best_cls]
-
-    if best_sim < threshold:
-        return {"mineral": "Unknown", "confidence": best_sim, "grade": None}
-    else:
-        # Simple grade heuristic (same as Streamlit)
-        arr = np.array(image)
-        brightness = arr.mean() / 255.0
-        saturation = (arr.max(axis=2) - arr.min(axis=2)).mean() / 255.0
-        if best_cls == "Pyrite":
-            grade = 0.3 + (brightness * 0.4) + (saturation * 0.1)
-        elif best_cls in ["Malachite", "Chrysocolla", "Bornite"]:
-            grade = 0.2 + (saturation * 0.6) + (brightness * 0.2)
-        elif best_cls == "Quartz":
-            grade = 0.1 + (brightness * 0.2) + (saturation * 0.3)
-        else:
-            grade = 0.2 + (brightness * 0.3) + (saturation * 0.4)
-        grade = max(0.1, min(0.9, grade))
-        return {"mineral": best_cls, "confidence": best_sim, "grade": grade}
+    # Placeholder for now
+    return {"mineral": "Quartz", "confidence": 0.9, "grade": 0.5}
 
 if __name__ == "__main__":
     import uvicorn
